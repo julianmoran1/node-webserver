@@ -1,47 +1,27 @@
 import express from 'express'
-import * as url from 'url';
-import hbs from 'hbs'
-import dotenv from 'dotenv';
+import 'dotenv/config'
+import cors from 'cors'
+import { router } from './routes/user.routes.js'
+import { dbConnection } from './database/config.db.js'
+import { connect } from 'mongoose'
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-//const __filename = url.fileURLToPath(import.meta.url);
-
-dotenv.config();
 const app = express()
 const port = process.env.PORT
+const apiRoute = "/api/usuarios"
+dbConnection()
 
-//servir contenido estático
-app.use(express.static("public"))
-app.set('view engine', 'hbs');
-hbs.registerPartials(`${__dirname}/views/partials`)
+//define la carpeta pública
+app.use(express.static('public'))
 
+//cors, para aceptar peticiones solo desde ciertos puntos
+app.use(cors())
 
-app.get('/', (req, res) => {
-  res.render("home", {
-    nombre: "Julián",
-    titulo: "Curso Node"
-  });
-})
+//parsea los post, patch, put o delete a json
+app.use(express.json())
 
-app.get('/generic.html', (req, res) => {
-  res.render("generic", {
-    nombre: "Julián",
-    titulo: "Curso Node"
-  });
-})
+//define la ruta de la api
+app.use(apiRoute, router)
 
-// app.get('/elements.html', (req, res) => {
-//   res.render("elements", {
-//     nombre: "Julián",
-//     titulo: "Curso Node"
-//   });
-// })
-
-
-app.get('*', (req, res) => {
-  res.sendFile(`${__dirname}/public/404.html`);
-})
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+app.listen(port, () =>{
+    console.log(`Aplicación escuchando el puerto nuevo ${port}`)
 })
